@@ -1,9 +1,11 @@
 ### IntelliJ IDEA ###
 out/
+doc/
+
 !**/src/main/**/out/
 !**/src/test/**/out/
 ### document
-!**/doc/
+
 
 ### Eclipse ###
 .apt_generated
