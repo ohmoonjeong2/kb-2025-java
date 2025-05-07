@@ -1,1 +1,0 @@
-memberSearchIndex = [{"p":"world.asia","c":"Korea","l":"Korea()","u":"%3Cinit%3E()"},{"p":"world.asia","c":"Korea","l":"population"}];updateSearchResults();
