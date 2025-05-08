@@ -1,5 +1,7 @@
 package com.kb.starbucks.vo;
 
+import java.util.Objects;
+
 public class Customer {
     private String id;
     private String pwd;
@@ -45,5 +47,17 @@ public class Customer {
                 ", pwd='" + pwd + '\'' +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return Objects.equals(id, customer.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
