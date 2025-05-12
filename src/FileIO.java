@@ -38,8 +38,7 @@ public class FileIO {
 
     static public void test() {
         String fileName1 = "c:\\a.txt"; //"c:/a.txt"  "./a.txt"
-
-        try (FileWriter fw = new FileWriter(fileName1, true)) {
+         try (FileWriter fw = new FileWriter(fileName1, true)) {
             fw.write("Hello World"); //파일에 쓰기 : 출력
             fw.write("\n");
             fw.write("Goodbye World");
