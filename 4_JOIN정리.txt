@@ -1,0 +1,21 @@
+ANSI 표준 JOIN
+
+INNER JOIN
+   SELECT t1.컬럼,,, t2.컬럼
+   FROM 테이블명1 t1 INNER JOIN 테이블명2  t2 ON (테이블명1.컬럼 = 테이블명2.컬럼)
+
+   SELECT 테이블명1.컬럼,,, 테이블명1.컬럼
+   FROM 테이블명1 NATURAL JOIN 테이블명2;
+
+   SELECT 테이블명1.컬럼,,, 테이블명1.컬럼
+   FROM 테이블명1 JOIN  테이블명2 USING(컬럼)
+
+OUTER JOIN
+   SELECT t1.컬럼,,, t2.컬럼
+   FROM 테이블명1 t1 LEFT OUTER JOIN 테이블명2  t2 ON (테이블명1.컬럼 = 테이블명2.컬럼)
+
+FULL JOIN
+   SELECT t1.컬럼,,, t2.컬럼
+   FROM 테이블명1 t1 FULL JOIN 테이블명2  t2 ON (테이블명1.컬럼 = 테이블명2.컬럼)
+
+

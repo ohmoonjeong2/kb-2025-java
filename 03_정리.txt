@@ -1,0 +1,558 @@
+SQL 
+-DDL : 데이터 정의어 
+     객체생성      CREATE 객체종류 ex) CREATE TABLE, CREATE VIEW
+     객체구조변경 ALTER 객체종류        ALTER TABLE
+     객체제거       DROP  객체종류
+
+-DML : 데이터 조작어
+      데이터 추가   INSERT
+      데이터 변경   UPDATE
+      데이터 삭제   DELETE
+
+-SELECT : 데이터 검색
+
+SELECT  
+FROM 
+[WHERE
+GROUP BY
+HAVING 
+ORDER BY]
+
+SELECT처리순서
+FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY
+<---------          SELECTION                     --->|<-- PROJECTION ---->    
+                      행 추출                                        컬럼 출력
+
+SELECT 컬럼명1, 컬럼명2,...
+FROM 테이블명;
+
+SELECT *
+FROM 테이블명;
+-----------------------------------------------------------------------------------
+1. 자료형
+    숫자형  INT, FLOAT, DECIMAL(전체자리수,소수점이하자리수)
+    문자형  CHAR(n), VARCHAR(n)
+    날짜형  DATE, DATETIME(타임존영향X), TIMESTAMP(타임존따라 값변환)
+
+2. 연산자
+    산술연산자 +,-,*,/,%   
+    비교연산자 >, <, >=, <=, =, <>, !=
+    대입연산자 =   UPDATE  employees SET first_name='U' WHERE last_name='B';
+    논리연산자 AND OR NOT
+    관계연산자 BETWEEN~AND, IN(), LIKE
+3. 조건 X -> 함수로 대신
+4. 반복 X
+
+--연산자
+SELECT emp_no +100  --산술연산자
+FROM employees
+--WHERE first_name='A'; --비교연산자
+WHERE first_name='A' AND last_name='B'; --논리연산자
+------------------------------------------------------
+별칭주기
+--컬럼의 heading 별칭
+SELECT emp_no, emp_no AS "사번",
+           birth_date "생년월일",
+           first_name "FIRST NAME"
+FROM employees;
+
+--테이블별칭
+SELECT e.emp_no
+FROM employees e;  O
+
+SELECT employees.emp_no
+FROM employees e; X
+------------------------------------------------------
+--컬럼 문자열값 결합함수 : CONCAT()
+SELECT emp_no, 
+           CONCAT(first_name, '-', last_name) AS "성명"
+FROM employees;
+------------------------------------------------------
+--행조건 : WHERE절에서 연산자사용해서 행조건을 설정
+SELECT * FROM salaries;
+
+-- 15만보다 많은 급여를 받은 급여정보를 출력하시오 
+SELECT * 
+FROM salaries
+WHERE salary > 150000;
+
+
+-- 급여범위가 15만이상인 20만이하인 사원의 사번, 급여, 급여시작일, 급여종료일을 출력하시오 --36건
+    -- AND 연산자
+SELECT * 
+FROM salaries
+WHERE salary >= 150000 AND salary <=200000;
+
+    -- BETWEEN 연산자
+SELECT * 
+FROM salaries
+WHERE salary BETWEEN 150000  AND 200000;
+
+
+-- 급여범위가 15만미만이거나 20만초과인 사원의 사번, 급여, 급여시작일, 급여종료일을 출력하시오 
+    -- OR 연산자
+SELECT * 
+FROM salaries
+WHERE salary < 150000 OR salary > 200000;
+
+    -- NOT연산자
+SELECT * 
+FROM salaries
+WHERE NOT (salary >= 150000 AND salary <=200000);
+
+    -- NOT BETWEEN 연산자
+SELECT * 
+FROM salaries
+WHERE salary NOT BETWEEN 150000  AND 200000;
+
+--부서번호 d005의 부서장과  d009부서장의 정보(부서번호,  부서장사번, 시작일, 종료일)를 출력하시오
+    -- OR연산자
+SELECT *
+FROM dept_manager 
+WHERE dept_no='d005' OR dept_no='d009';
+
+--부서번호 d005의 현재부서장과  d009의 현재부서장의 정보(부서번호,  부서장사번, 시작일, 종료일)를 출력하시오
+    -- OR연산자와 AND연산자의 우선순위 : AND 연산이 OR 연산보다 우선수위 높다
+SELECT *
+FROM dept_manager 
+WHERE dept_no='d005' OR dept_no='d009' AND to_date='9999-01-01'; --X
+
+    -- ( ) 연산자 : SQL구문이 길어지면 네트워크 비용이 높아진다
+SELECT *
+FROM dept_manager 
+WHERE (dept_no='d005' OR dept_no='d009') AND to_date='9999-01-01'; -- O
+
+    -- IN 연산자로 해결
+SELECT *
+FROM dept_manager 
+WHERE dept_no IN('d005', 'd009') AND to_date='9999-01-01'; 
+
+
+-- 직책이 'Engineer'로 끝나는 사원들의 사번, 직책, 시작일, 종료일 정보를 출력하시오
+    -- LIKE 연산자로 해결
+SELECT *
+FROM titles
+WHERE title LIKE '%Engineer';
+
+-- 'S'로 시작하고 5글자로 구성된 직책을 갖는 사원들의 사번, 직책, 시작일, 종료일 정보를 출력하시오
+    -- LIKE 연산자로 해결
+SELECT *
+FROM titles
+WHERE title LIKE 'S____';
+    -- 함수로 해결
+SELECT *
+FROM titles
+WHERE SUBSTRING(title, 1, 1) = 'S' AND LENGTH(title) = 5;
+
+
+-- 두번째글자가 'e'인 직책을 갖는 사원들의 사번, 직책, 시작일, 종료일 정보를 출력하시오
+    -- LIKE 연산자로 해결
+SELECT *
+FROM titles
+WHERE title LIKE '_e%';
+    -- 함수로 해결
+SELECT *
+FROM titles
+WHERE INSTR(title, 'e') = 2;
+------------------------------------------------------
+중복제거 : DISTINCT
+SELECT * FROM titles;
+SELECT DISTINCT title FROM titles; 
+------------------------------------------------------
+출력할 행을 제한 : LIMIT
+SELECT * FROM titles LIMIT 5;
+------------------------------------------------------
+정렬 : ORDER BY
+SELECT *
+FROM employees
+ORDER BY first_name;
+
+--내림차순
+SELECT *
+FROM employees
+ORDER BY first_name DESC;
+
+SELECT *
+FROM employees
+ORDER BY first_name DESC, last_name;
+
+SELECT emp_no, first_name
+FROM employees
+ORDER BY first_name DESC, last_name;
+
+-- SELECT한 컬럼명 대신 컬럼의 위치사용 가능 : DB에서의 위치는 1부터! 
+SELECT emp_no, first_name
+FROM employees
+ORDER BY 2 DESC, last_name;
+
+-- SELECT한 컬럼명 대신 컬럼의 별칭사용 가능 : DB에서의 위치는 1부터! 
+SELECT emp_no, first_name  "이름"
+FROM employees
+ORDER BY 이름 DESC, last_name;
+---------------------------------------
+내장함수
+  --단일행함수 : 각 행별로 처리되는 함수
+   (1)형변환 함수 : CAST(), CONVERT()
+       SELECT CAST('100' AS SIGNED INTEGER) 
+       SELECT CAST('100' AS SIGNED INTEGER)  + CONVERT('200', SIGNED INTEGER); --300
+   (2) 제어함수 :  IF(수식, 참, 거짓),
+        SELECT IF(100>200, '100은 200보다크다' , '100은 200보다 작거나 같다');
+        
+        IFNULL(수식1, 수식2): 수식1이 null이면 수식2를 반환, 수식1이 null이 아니면 수식1을 반환
+        SELECT IFNULL(NULL, '널'), IFNULL(100, '널') --'널', 100
+       
+        NULLIF(수식1, 수식2) : 수식1과 수식2가 같으면 null반환, 다르면 수식1을 반환
+
+    (3) 조건절 : CASE WHEN THEN ELSE END
+        --급여가 7만보다 큰경우 'A'출력,  6만보다 많은 경우 'B', 그외의 급여인 경우 'C'등급을 출력하시오
+         SELECT CASE   WHEN salary > 70000 THEN 'A'
+                              WHEN salary > 60000 THEN 'B'
+                              ELSE  'C'
+                    END "급여 등급"
+          FROM salaries;       
+
+     (4) 문자함수 : ASCII(아스키코드), CHAR(숫자), LENGTH(), CHAR_LENGTH(), CONCAT(문자열1, 문자열2), INSTR(string, substring), SUBSTRING(string, start_position, length), FORMAT(), INSERT(), UPPER(), LOWER(), LPAD()/RPAD(), LTRIM()/RTRIM(), TRIM()
+     (5) 숫자함수 : ABS(), ROUND(), TRUNCATE(), CEIL(), FLOOR()
+     (6) 날짜함수 : NOW(), 
+                        CURDATE(), CURRENT_DATE(), CURRENT_DATE
+                        ADDDATE(), SUBDATE(),
+                         -- SELECT ADDDATE('2025-05-14', INTERVAL 31 DAY)
+                        YEAR(날짜), MONTH(날짜), DAYOFMONTH(), HOUR(), MINUTE(), SECOND()
+                        DATE(날짜), DATEDIFF(날짜1, 날짜2)
+                        LAST_DAY(날짜) 
+  
+  --여러행함수 : 여러행을 묶어 처리되는 함수
+      COUNT(컬럼) : 컬럼값이 NULL인 행은 제외하고 행의 개수 계산 
+      COUNT(*) : NULL관계없이 행의 개수 계산
+      SUM(컬럼)   
+      AVG(컬럼): NULL을 포함하지 않고 계산  
+      MIN(컬럼) 
+      MAX(컬럼)
+     
+     사원수를 출력하시오
+     SELECT COUNT(*) FROM employees;
+-----------------------------------------------------
+그룹화 : GROUP BY
+-- 년도별 입사한 사원수를 출력하시오
+SELECT YEAR(hire_date), COUNT(*)
+FROM employees
+GROUP BY YEAR(hire_date);
+
+-- 홀수 년도에 입사한 사원수를 출력하시오
+SELECT COUNT(*)
+FROM employees
+WHERE YEAR(hire_date) % 2 = 1;
+
+-- 홀수 년도에 입사한 사원수를 출력하시오 오래된 년도부터 출력하시오
+SELECT YEAR(hire_date) y, COUNT(*)
+FROM employees
+WHERE YEAR(hire_date) % 2 = 1
+GROUP BY YEAR(hire_date)
+-- ORDER BY YEAR(hire_date) -- OK
+-- ORDER BY 1; -- OK
+ORDER BY y; -- OK
+
+--년도별 성별 입사자수를 출력하시오
+SELECT YEAR(hire_date), gender, COUNT(*)
+FROM employees
+GROUP BY YEAR(hire_date), gender;
+
+**ONLY_FULL_GROUP_BY모드 : SELECT절에 있는 모든 비집계컬럼과 표현식은 GROUP BY에 반드시 있어야한다
+SELECT YEAR(hire_date), gender,  
+       emp_no, -- GROUP BY에 없는 비집계컬럼 : X 오류메시지 확인!
+       COUNT(*) -- 집계컬럼
+FROM employees
+GROUP BY YEAR(hire_date), gender;
+
+
+SELECT CAST(YEAR(hire_date) AS CHAR), -- GROUP BY에서 사용한 자료형과 다름 : X 
+       gender,         
+       COUNT(*) -- 집계컬럼
+FROM employees
+GROUP BY YEAR(hire_date), gender;
+-----------------------------------------------------
+그룹조건 : HAVING
+-- 입사자 수가 5천명 미만인 년도의 입사자수를 출력하시오. 단, 입사자수가 많은 년도부터 출력하시오
+SELECT YEAR(hire_date), COUNT(*)
+FROM employees
+WHERE   COUNT(*) < 5000 -- X
+GROUP BY
+    YEAR(hire_date);   
+
+
+SELECT YEAR(hire_date), COUNT(*)
+FROM employees
+GROUP BY
+    YEAR(hire_date)
+HAVING
+    COUNT(*) < 5000
+ORDER BY 2 DESC;    
+-----------------------------------------------------
+집계 : WITH ROLLUP
+-- 년도별 성별 입사자수를 출력하고 집계하시오
+<결과>
+year      gender    count
+--------------------------------
+ : 
+1999	M	905
+1999	F	609
+1999		1514    <-- 집계결과
+2000	M	6
+2000	F	7
+2000		13      <-- 집계결과 
+		    300024  <-- 총집계결과
+
+SELECT YEAR(hire_date), gender, COUNT(*)
+FROM employees
+GROUP BY YEAR(hire_date), gender
+WITH ROLLUP;
+
+-- 위의 결과에서 gender가 null이면 '사원수' null이 아니면 gender값을 출력하시오
+<결과>
+ :
+1999	M   	905
+1999	F   	609
+1999	사원수	1514
+2000	M   	6
+2000	F   	7
+2000	사원수	13
+        사원수	300024
+
+SELECT  YEAR(hire_date),
+           IFNULL(gender, '사원수'),
+           COUNT(*)
+FROM employees
+GROUP BY YEAR(hire_date), gender
+WITH ROLLUP;
+
+-- 위의 결과에서 year결과가 NULL이면  '총'을 출력                   
+<결과>
+ :
+1999	M   	905
+1999	F   	609
+1999	사원수	1514
+2000	M   	6
+2000	F   	7
+2000	사원수	13
+총  	사원수	300024
+
+  **ONLY_FULL_GROUP_BY모드 오류 발생 :  SELECT절에 있는 모든 비집계컬럼과 표현식은 GROUP BY에 반드시 있어야한다
+SELECT IFNULL(DATE_FORMAT(hire_date, '%Y'), '총') 연도, -- 새로운 표현식 : X
+           IFNULL(gender, '사원수')성별,  -- 단순 컬럼에 대한 변형
+           COUNT(*)  사원수
+FROM employees           
+GROUP BY DATE_FORMAT(hire_date, '%Y'), --함수로 생성된 표현식
+         gender --단순한 컬럼
+WITH ROLLUP; 
+
+  ** INLINE VIEW로 해결
+SELECT  
+    IFNULL(연도, '총') AS 년도,
+    IFNULL(gender, '사원수') AS 성별,
+    COUNT(*) AS 사원수
+FROM (
+    SELECT 
+        DATE_FORMAT(hire_date, '%Y') AS 연도,
+        gender
+    FROM employees
+) AS sub
+GROUP BY 연도, gender WITH ROLLUP;
+----------------------------------------------------------
+
+  ** NULL비교
+WHERE a IS NULL;
+WHERE b IS NOT NULL;
+
+-----------------------------------------------------
+집합 : 
+UNION ALL : 합집합
+UNION : 중복제거된 합집합
+-- UNION과 UNION ALL의 차이점
+-- 사번구간(10001~10020)과 사번구간(10010~10030)의 중복데이터(10010~10020) 존재
+SELECT emp_no, first_name FROM employees WHERE emp_no BETWEEN 10001 AND 10020
+UNION ALL
+SELECT emp_no, first_name FROM employees WHERE emp_no BETWEEN 10010 AND 10030;
+
+-- 사번구간(10001~10020)과 사번구간(10010~10030)의 중복데이터(10010~10020) 제거
+SELECT emp_no, first_name FROM employees WHERE emp_no BETWEEN 10001 AND 10020
+UNION
+SELECT emp_no, first_name FROM employees WHERE emp_no BETWEEN 10010 AND 10030;
+
+
+SELECT 
+  emp_no,
+  first_name,
+  last_name,
+  '남자' AS 성별
+FROM employees
+WHERE gender = 'M'
+UNION 
+SELECT 
+  emp_no,
+  first_name,
+  last_name,
+  '여자' AS 성별
+FROM employees
+WHERE gender = 'F';
+
+
+
+
+-- 부서별 재직자 수를 출력하시오  
+SELECT '재직 중' AS 상태, COUNT(DISTINCT emp_no) AS 인원수
+FROM dept_emp
+WHERE to_date = '9999-01-01'
+GROUP BY dept_no;
+
+-- 부서별 퇴사자 수를 출력하시오
+SELECT '퇴사자' AS 상태, COUNT(DISTINCT emp_no) AS 인원수
+FROM dept_emp
+WHERE to_date <> '9999-01-01'
+GROUP BY dept_no;
+
+-- 부서별 재직자 인원수 행과 퇴사자 인원수 행을 아래와 같이 출력하시오
+<결과>
+d001	재직자수14842
+d001	퇴사자	5369
+d002	재직자수12437
+d002	퇴사자	4909
+d003	재직자수12898
+d003	퇴사자	4888
+d004	재직자수53304
+d004	퇴사자	20181
+d005	재직자수61386
+d005	퇴사자	24321
+d006	재직자수14546
+d006	퇴사자	5571
+d007	재직자수37701
+d007	퇴사자	14544
+d008	재직자수15441
+d008	퇴사자	5685
+d009	재직자수17569
+d009	퇴사자	6011
+
+SELECT dept_no, '재직 중' AS 상태, COUNT(DISTINCT emp_no) AS 인원수
+FROM dept_emp
+WHERE to_date = '9999-01-01'
+GROUP BY dept_no
+
+UNION 
+
+SELECT dept_no, '퇴사자' AS 상태, COUNT(DISTINCT emp_no) AS 인원수
+FROM dept_emp
+WHERE to_date <> '9999-01-01'
+GROUP BY dept_no
+
+ORDER BY dept_no;
+
+
+
+-- JOIN과의 차이점 
+-- 집합은 행을 결합, JOIN은 열을 결합
+-- 재직자 인원수와 퇴사자 인원수를 아래처럼 출력하시오
+<결과>
+dept_no 재직자수 퇴사자수
+d001	14842	5369
+d002	12437	4909
+d003	12898	4888
+d004	53304	20181
+d005	61386	24321
+d006	14546	5571
+d007	37701	14544
+d008	15441	5685
+d009	17569	6011
+SELECT 
+    dept_no ,
+    -- 재직자 수: to_date가 9999-01-01인 직원
+    COUNT(CASE WHEN to_date = '9999-01-01' THEN 1 END) AS 재직자수,
+    -- 퇴사자 수: to_date가 9999-01-01이 아닌 직원
+    COUNT(CASE WHEN to_date <> '9999-01-01' THEN 1 END) AS 퇴사자수
+FROM 
+    dept_emp
+GROUP BY 
+    dept_no;
+
+-----------------------------------------------------
+서브쿼리 : 쿼리의 순서를 갖는다
+
+위치에 따라 서브쿼리
+스칼라쿼리 : SELECT 서브쿼리
+인라인뷰    : FROM 서브쿼리
+서브쿼리    : WHERE  서브쿼리
+
+결과행 수에 따라 서브쿼리 
+단일행 서브쿼리 : 메인쿼리와 일반비교연산자(=, >, >=, <, <=, <>)로 비교 
+여러행 서브쿼리 : 메인쿼리와 IN, ANY, ALL연산자로 비교
+ WHERE  >ANY (서브쿼리) : 서브쿼리의 최소결과값보다 크면  
+            <ANY                 : 서브쿼리의 최대결과값보다 작으면
+            >ALL                  : 서브쿼리의 최대결과값 크면
+            <ALL                  : 서브쿼리의 최소결과값보다 작으면
+
+ WHERE =ANY 와
+            IN는 같은 표현!
+WHERE a IN (SELECT a FROM ~~~); 결과가             
+WHERE a IN ( 100, NULL, 30);처럼 된 경우
+      a = 100 OR a = NULL OR a = 30로 처리됨
+      
+WHERE a NOT IN (SELECT a FROM ~~~); 결과가  
+WHERE a NOT IN ( 100, NULL, 30);처럼 된 경우
+       a <> 100 AND a<> NULL AND a <>30로 처리됨
+      결과 행수 0건
+
+WHERE a NOT IN (SELECT IFNULL(a, 0) FROM ~~~);로 처리해야함
+
+-- 최대급여를 출력하시오
+SELECT MAX(salary) 
+FROM salaries;
+
+-- 최대급여를 받는 사원의 사번을 출력하시오 
+SELECT MAX(salary), 
+       emp_no -- X ONLY_FULL_GROUP_BY모드 : SELECT절에 있는 모든 비집계컬럼은 GROUP BY에 반드시 있어야한다
+FROM  salaries; 
+
+** 서브쿼리로 해결
+SELECT emp_no, salary
+FROM salaries
+WHERE salary = (SELECT MAX(salary) 
+                FROM  salaries);
+
+
+-- 단일행 서브쿼리
+-- first_name이 'Lillian'이고	last_name이 'Haddadi'인 사원의 입사일자가 같은 사원들의 사번, 성명, 입사일자를 출력하시오
+SELECT emp_no, first_name, last_name, hire_date
+FROM employees
+WHERE hire_date = (SELECT hire_date FROM employees WHERE first_name='Lillian' AND last_name='Haddadi')
+AND NOT(first_name='Lillian' AND last_name='Haddadi');
+
+-- 여러행 서브쿼리
+-- 급여가 15만 이상인 사원의 사번, 이름을 출력하시오
+
+SELECT emp_no, first_name
+FROM employees
+WHERE emp_no IN (SELECT emp_no FROM salaries WHERE salary >= 150000);
+
+-- 급여가 15만 미만인 사원의 사번, 이름을 출력하시오
+    -- IN 
+SELECT emp_no, first_name
+FROM employees
+WHERE emp_no IN (SELECT emp_no FROM salaries WHERE salary < 150000);
+    -- NOT IN
+SELECT emp_no, first_name
+FROM employees
+WHERE emp_no NOT IN (SELECT emp_no FROM salaries WHERE salary >= 150000);
+
+
+-- 현재 급여가 15만이상인 사원의 사번, 이름을 출력하시오. 현재 급여란 급여최종일자가 9999-01-01로 설정되어있다
+SELECT emp_no, first_name
+FROM employees
+WHERE emp_no IN (SELECT emp_no FROM salaries WHERE salary >= 150000 AND to_date='9999-01-01');
+
+-- 스칼라 서브쿼리 : 단일행을 반환하는 서브쿼리이어야한다
+-- 현재 급여가 15만이상인 사원의 사번, 이름, 급여를 출력하시오
+SELECT emp_no, first_name,
+      (SELECT salary 
+       FROM salaries 
+       WHERE emp_no = employees.emp_no 
+       AND to_date='9999-01-01')
+FROM employees
+WHERE emp_no IN (SELECT emp_no FROM salaries WHERE salary >= 150000 AND to_date='9999-01-01');

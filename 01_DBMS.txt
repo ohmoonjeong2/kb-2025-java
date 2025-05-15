@@ -1,0 +1,39 @@
+MySQL설치
+C:\TEMP>git clone https://github.com/datacharmer/test_db.git
+C:\TEMP>cd test_db
+C:\TEMP\test_db>mysql -u root -p
+mysql> source employees.sql;
+mysql> show database;
++--------------------+
+| Database           |
++--------------------+
+| employees          |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+
+shopDB스키마 만들기
+워크벤치에서 왼쪽사이드바 우클릭 -> Add Schema 
+또는 
+mySQL>CREATE DATABASE shopDB;
+
+
+데이터베이스들 확인:
+show databases;
+
+현재사용중인 데이터베이스 확인:
+SELECT DATABASE();
+
+사용할 데이터베이스 선택:
+use shopDB
+
+SQL 실행 : ctrl+shift+enter
+
+
+
+https://github.com/ohmoonjeong2/kb-2025-java.git
+https://github.com/ohmoonjeong2/kb-2025-java.git
