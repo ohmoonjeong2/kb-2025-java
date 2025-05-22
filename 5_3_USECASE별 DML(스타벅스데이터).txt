@@ -1,0 +1,46 @@
+-- 상품전체목록을 출력한다
+SELECT * 
+FROM product
+ORDER BY prod_no;
+
+-- 상품번호로 상품을 출력한다
+SELECT *
+FROM product
+WHERE prod_no='C0001';
+
+-- 고객ID로 고객정보를 출력한다
+SELECT *
+FROM customer
+WHERE id='id1';
+
+
+-- 'id2'고객의 비번을 'p'에서 'p2'로 변경한다
+INSERT INTO customer (id, pwd, name) VALUES ('id2', 'p', 'n2');
+
+UPDATE customer SET pwd = 'p2' WHERE id='id2' AND pwd='p';
+
+-- 'id2'고객탈퇴한다
+ALTER TABLE customer ADD status INT; -- 회원상태용 컬럼추가
+UPDATE customer SET status = 0 WHERE  id='id2'; --상태를 0으로 설정
+
+-- 현재 활동중인 고객들을 조회한다
+SELECT *
+FROM customer 
+WHERE status IS NULL;
+
+-- 탈퇴한 고객들을 조회한다
+SELECT *
+FROM customer
+WHERE stauts IS NOT NULL;
+--------------------------------------------------------------------------------
+-- 'id1'고객이 주문한 주문 목록(주문번호, 주문일자, 주문상품번호, 상품명, 가격, 주문수량)을 출력한다
+SELECT order_info_no, order_dt, order_prod_no, prod_name, prod_price, order_quantity
+FROM order_info info JOIN order_line line ON (info.order_info_no = line.order_line_no)
+                               JOIN product p ON (line.order_prod_no = p.prod_no)
+WHERE order_id = 'id1'
+ORDER BY order_info_no DESC;
+
+
+
+ 
+------------------------------------------------------------------

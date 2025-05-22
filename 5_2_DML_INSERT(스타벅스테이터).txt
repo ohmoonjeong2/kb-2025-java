@@ -1,0 +1,19 @@
+-- 상품데이터 추가한다
+INSERT INTO product(prod_no, prod_name, prod_price) VALUES ('C0001', 'americano', 1000);
+INSERT INTO product(prod_no, prod_name, prod_price) VALUES ('C0002', 'ice americano', 0); -- 0원은 추가안됨
+INSERT INTO product(prod_no, prod_name, prod_price) VALUES ('C0002', 'ice americano', 1000); 
+INSERT INTO product(prod_no, prod_name, prod_price) VALUES ('C0003', 'latte', 1500);
+INSERT INTO product(prod_no, prod_name, prod_price) VALUES ('C0004', 'ice latte', 1500);
+
+-- 고객데이터 추가한다
+INSERT INTO customer VALUES ('id1', 'p1', 'n1');
+INSERT INTO customer VALUES ('id2', NULL, NULL);  -- 비번은 NULL 저장안됨, 이름은 NULL저장안됨
+
+-- 주문기본
+INSERT INTO order_info VALUES ( 1, 'id1', '2025-01-01');
+INSERT INTO order_info VALUES ( 2, 'idXXX', '2025-01-01'); -- FK 위배
+INSERT INTO order_info(order_info_no, order_id)  VALUES ( NULL, 'id1');  -- 주문번호는 일련번호, 주문날짜시간은 현재시간값으로 추가됨
+
+-- 주문상세
+INSERT INTO order_line(order_line_no, order_prod_no, order_quantity) VALUES (1, 'C0001', 1);
+INSERT INTO order_line(order_line_no, order_prod_no, order_quantity) VALUES (1, 'C0002', 4);

@@ -1,0 +1,200 @@
+Query : SELECT
+DML : 데이터 조작어
+         INSERT
+         UPDATE
+         DELETE
+
+DDL : 데이터 정의어
+   CREATE 객체종류 : 객체생성   
+   DROP 객체종류  : 객체 제거
+   ALTER 객체종류 : 객체 구조 변경
+--------------------------------------------
+DROP TABLE IF  EXISTS usertbl;
+CREATE TABLE 테이블명(
+    컬럼명 자료형 기본값 제약조건,
+
+)
+
+무결성제약조건 : 결점이 없는 데이터를 만들기 위한 조건 설정
+제약조건의 종류
+   NOT NULL
+   UNIQUE
+   PRIMARY KEY
+   FOREIGN KEY : 
+   CHECK
+------------------------------------------------
+제약조건 설정방법
+  - 컬럼레벨의 제약조건 설정 : 컬럼설정하면서 제약조건도 같이 설정     
+     CREATE TABLE parent(
+         p INT PRIMARY KEY
+     );
+
+     NOT NULL은 반드시 컬럼레벨의 제약조건으로 설정한다
+     DROP TABLE child_1;
+     CREATE TABLE child_1( 
+          a INT AUTO_INCREMENT PRIMARY KEY,          
+          b INT NOT NULL, -- 
+          c VARCHAR(10) UNIQUE,         
+          d INT REFERENCES parent(p),
+          e INT CHECK (e > 0)
+     );
+
+  - 테이블레벨의 제약조건 설정 : 컬럼설정한 후 제약조건 따로 설정
+     복합키(여러컬럼으로 구성된 PK)는 반드시 테이블레벨의 제약조건으로 설정한다
+     DROP TABLE child_2;
+     CREATE TABLE child_2(
+          a INT,
+          b INT,
+          c VARCHAR(10) ,
+          d INT, 
+          e INT,          
+          CONSTRAINT un_child_2_c UNIQUE(c),            
+          CONSTRAINT chk_child_2_e CHECK (e>0), 
+          PRIMARY KEY(a,b), -- 복합키
+          FOREIGN KEY(d) REFERENCES parent(p)  -- CONSTRAINT 제약조건이름 생략가능
+     );
+---------------------------------------------------
+제약조건에 대한 메타정보는 어디에 있나?  INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+---------------------------------------------------
+FOREIGN KEY : 부모엔티티의 PK또는UNIQUE컬럼을 자식엔티티에서 FK로 참조할 수 있다
+ 부모엔티티        사원
+ 자식엔터티  직책  급여
+
+   DROP TABLE child_3;
+   CREATE TABLE child_3(
+        a INT PRIMARY KEY,
+        b INT REFERENCES parent(p)
+   );
+
+   자식엔티티의 FK컬럼에 NULL값 저장할 수 있나? YES
+   INSERT INTO parent VALUES (1), (2), (3);
+   INSERT INTO child_3(a, b) VALUES (1, NULL); -- NULL 저장됨
+   INSERT INTO child_3(a, b) VALUES (2, 3); -- OK
+
+
+  ON DELETE CASCADE : 부모엔티티의 데이터가 삭제될 때 자식엔티티도 같이 삭제되로록 자식엔티티의 FK설정에 추가할 수 있다
+  ON UPDATE CASCADE : 부모엔티티의 데이터가 수정될 때  자식엔티티도 같이 수정되로록 자식엔티티의 FK설정에 추가할 수 있다
+   **주의 : 테이블레벨로만 설정할 수 있다
+   DROP TABLE child_4;
+   CREATE TABLE child_4(
+        a INT PRIMARY KEY,
+        b INT, 
+        FOREIGN KEY(b) REFERENCES parent(p) ON DELETE CASCADE
+   );
+   INSERT INTO parent VALUES (4);
+   INSERT INTO child_4(a, b) VALUES (1, 4);
+   DELETE FROM parent WHERE p=4;  -- 부모엔티티의 데이터가 삭제될 때 자식엔티티도 같이 삭제
+   SELECT * FROM child_4;
+ --------------------------------------------------- 
+기본값 설정
+CREATE TABLE test (
+a INT           AUTO_INCREMENT    PRIMARY KEY,
+b DATETIME DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+c INT           DEFAULT 0
+)
+
+INSERT INTO test(a, b, c) VALUES (NULL, '2025-01-01', 0);
+INSERT INTO test(a) VALUES (NULL);   -- NULL, 현재날짜시간값, 0
+INSERT INTO test(a, b) VALUES (NULL, NULL); -- NOT NULL 제약조건 위배
+INSERT INTO test(a, c) VALUES (NULL, NULL);  -- c컬럼에 NULL추가됨
+--------------------------------------------------------
+테이블 구조 변경 : ALTER TABLE 테이블명 옵션
+옵션 종류 : ADD, MODIFY, DROP 
+ALTER TABLE users ADD age INT; -- age컬럼 추가
+ALTER TABLE users DROP COLUMN age;  -- age컬럼 제거
+ALTER TABLE users RENAME COLUMN old_name TO new_name;  --컬럼명 변경
+ALTER TABLE users MODIFY age SMALLINT; -- 컬럼의 자료형, 자릿수 변경
+ALTER TABLE users ALTER age SET DEFAULT 0;  -- 기본값추가
+ALTER TABLE users ALTER age DROP DEFAULT;  -- 기본값제거
+
+ALTER TABLE users  -- 제약조건 추가 
+ADD CONSTRAINT fk_user FOREIGN KEY (age) REFERENCES parent(p) ON DELETE CASCADE;
+
+ALTER TABLE users DROP FOREIGN KEY fk_user;  -- 제약조건 제거
+ 
+--------------------------------------------------------
+테이블 제거 : DROP TABLE 테이블명
+--------------------------------------------------------
+테이블 스페이스 : 성능향상을 위한 테이블 스페이스 추가 
+  성능향상을 위해 : 대용량데이터를 운영할 때  테이블스페이스의 분리를 적극 고려(feat:하드웨어 파티션분리처럼 )
+  C:\ProgramData\MySQL\MySQL Server 8.4\Data경로에 테이블스페이스 저장
+---------------------------------------------------------
+데이터 조작
+USE starbucks;
+-- 상품테이블의 제약조건 추가하기
+컬럼명 : prod_price
+제약조건종류 : CHECK
+제약조건이름 : chk_prod_price
+제약조건내용 : 0보다 큰값
+ALTER TABLE product
+ADD CONSTRAINT chk_prod_price CHECK (prod_price > 0);
+
+-- 고객테이블의 제약조건 추가하기
+컬럼명: pwd
+제약조건종류 : NOT NULL
+
+컬럼명: name
+제약조건종류 : NOT NULL
+ALTER TABLE customer MODIFY pwd VARCHAR(5) NOT NULL;
+ALTER TABLE customer MODIFY name VARCHAR(20) NOT NULL;
+
+-- 주문기본테이블의 주문번호(order_info_no) 컬럼은 일련번호 자동생성되도록 설정
+: 자식엔티티가 참조하는 부모엔티티는 컬럼구조 변경할 수 없다
+: ALTER TABLE order_info MODIFY order_info_no INT AUTO_INCREMENT; -- X
+
+해결step
+-- 1. 자식엔티티의 FK제약조건 이름 찾기
+SELECT *
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+WHERE TABLE_NAME = 'order_line';
+
+-- 2. 자식엔티티의 FK제약조건 제거하기
+ALTER TABLE order_line
+DROP FOREIGN KEY fk_order_line_order_info1;
+
+-- 3. 부모엔티티의 PK컬럼 구조 변경하기
+ALTER TABLE order_info
+MODIFY order_info_no INT AUTO_INCREMENT;
+
+-- 4. 자식엔티티의 FK제약조건 추가하기
+ALTER TABLE order_line
+ADD CONSTRAINT fk_order_line_no FOREIGN KEY(order_line_no) REFERENCES order_info(order_info_no);
+
+-- 주문일자를 생략하면 현재날짜시간값이 추가되도록 기본값 변경하기
+ALTER TABLE order_info 
+MODIFY order_dt DATETIME DEFAULT CURRENT_TIMESTAMP;
+
+-- 주문수량은 1이상 100이하가 되도록 변경하기
+ALTER TABLE order_line
+ADD CONSTRAINT chk_order_quantity CHECK (order_quantity BETWEEN 1 AND 100);
+-------------------------------------------------------------
+
+
+
+
+         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+

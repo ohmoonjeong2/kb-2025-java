@@ -1,0 +1,73 @@
+트랜잭션 처리(A,C,I,D)
+Atomicity (원자성) : 모든 작업이 전부 수행되거나, 전혀 수행되지 않아야 함.
+실패하면 전체 롤백되어 이전 상태로 복구됨.
+
+Consistency (일관성) : 트랜잭션 수행 전후의 데이터는 항상 일관된 상태를 유지해야 함.
+ex) A->B계좌이체 
+이체전의 두 계좌의 잔액총합은 이체후에도 변하지 않는다
+
+Isolation (고립성) : 동시에 실행되는 트랜잭션은 서로 간섭하지 않아야 함.
+
+Durability (지속성) : 트랜잭션이 성공적으로 완료되면 그 결과는 영구적으로 저장되어야 함.
+ex) A->B계좌이체시 commit후 서버가 비정상 종료되었다 재시작된 후에도 잔액은 여전이 이체상태가 되어야한다 
+     InnoDB는 Redo Log(COMMIT 시점에 변경된 내용을 Redo Log에 먼저 기록) 와 Doublewrite Buffer를 사용해 장애 발생 시에도 데이터를 복구할 수 있다
+
+MySQL엔진중 InnoDB엔진만 트랜잭션을 지원함
+
+--엔진확인방법 
+SHOW TABLE STATUS LIKE 'order_info'; 
+
+
+START TRANSACTION;  -- 트랜잭션 시작 
+또는 
+set autocommit=0; -- auto commit 해제 
+
+트랜잭션 시나리오
+ex) 
+set autocommit=0;  -- auto commit 해제 
+DDL(C/A/D/truncate), SELECT - 트랜잭션 자동시작 - 자동종료됨
+DML(I/U/D)                          - 트랜잭션자동시작  - 자동종료되지 않음( 수동종료방법: commit, rollback )
+ex) 주문추가 작업 트랜잭션
+  기본 추가 -> 상세 추가  -> commit
+  기본 추가 -> 상세 추가실패 -> rollback
+  기본 추가실패 -> 상세 추가 -> rollback
+
+set autocommit=0;
+-- START TRANSACTION;
+
+INSERT INTO customer(id, pwd, name) VALUES ('id91', 'p91', 'n91');
+SAVEPOINT sp1;
+
+INSERT INTO customer(id, pwd, name) VALUES ('id92', 'p92', 'n92');
+SAVEPOINT sp2;
+
+INSERT INTO customer(id, pwd, name) VALUES ('id93', 'p93', 'n93');
+ROLLBACK TO sp2;
+
+commit; 
+SELECT * FROM customer;
+id1	p1	n1
+id91	p91	n91
+id92	p92	n92
+
+읽기 일관성이란 
+쓰기작업을 시작하기 전 마지막 커밋 시점의 상태대로 
+다른사람들이 데이터를 볼 수 있도록 보장하는 것을 말한다
+  읽는 사람은 쓰는 사람의 작업이 완료되길 기다릴 필요가 없다
+  쓰는 사람은 읽는 사람의 작업이 완료되기를 기다릴 필요가 없다
+  쓰는 사람은 다른 쓰는 사람의 작업이 완료되기를 기다려야 한다
+  A : (set autocommit=0;
+UPDATE  customer
+SET name='test'
+WHERE id='id99';)
+  
+ B :  (set autocommit=0;
+select * from customer;
+UPDATE  customer
+SET name='테스트'
+WHERE id='id99';  -- 블러킹됨 : 해결방법 A세션에서 commit/rollback해야함
+)
+
+
+
+
