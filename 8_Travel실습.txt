@@ -1,0 +1,20 @@
+Comma Separated Values : 쉼표로 값을 구분하는 텍스트파일형식
+
+CSV파일을 테이블로 만들기
+다양한 방법이 있다
+1. IntelliJ또는 MySQL Workbench의 기능을 사용하기
+2. Java의 입출력API를 이용해서 CSV파일을 파싱 후 DB에 저장
+3. CSV용 라이브러리를 활용해서  ex)opencsv 파싱 후 DB에 저장
+
+step1. DB에 테이블 생성 : 스키마-jdbc_ex, 계정-scoula, 비번-1234, database.sql
+
+step2. VO클래스 작성 : TravelVO.java, TravelImageVO.java
+step3. CSV파일 내용읽어서 파싱하기 : travel.csv파일, travel-image폴더
+          ImportTravelData.java, ImportImageData.java
+step4. DAO클래스 작성  : TravelDao.java
+step5. 테이블에 추가 
+          step3에서 파싱한 내용을 VO객체로 생성해서 DAO의 insert()로 테이블에 추가
+          ImportTravelData실행
+          ImportImageData실행
+step6. Service클래스 작성 Usecase별 기능을 포함 : TravelService.java
+step7. TravelApp실행

@@ -1,0 +1,87 @@
+JUnit : 자바 단위테스트 도구 
+
+JUnit에서는 테스트 작성 시 여러 어노테이션(Annotations)을 사용하여 테스트 메서드의 실행 시점, 반복, 예외 처리, 조건부 실행 등을 조절할 수 있다
+@Test
+void testSum() {
+    assertEquals(4, 2 + 2);
+}
+
+테스트 전후 처리
+@BeforeEach
+void setUp() {
+    System.out.println("각 테스트 전 실행");
+}
+@AfterEach
+void tearDown() {
+    System.out.println("각 테스트 후 실행");
+}
+@BeforeAll
+static void beforeAll() {
+    System.out.println("전체 테스트 전 딱 한 번 실행");
+}
+@AfterAll
+static void afterAll() {
+    System.out.println("전체 테스트 후 딱 한 번 실행");
+}
+
+테스트 이름 커스터마이징
+@DisplayName("더하기 테스트 - 2 + 3 = 5")
+@Test
+void addTest() {
+    assertEquals(5, 2 + 3);
+}
+
+테스트 잠시 비활성화
+@Disabled("나중에 구현 예정")
+@Test
+void 미완성테스트() {
+    fail("이 테스트는 실행되지 않음");
+}
+
+반복 테스트
+@RepeatedTest(3)
+void 반복테스트() {
+    System.out.println("테스트 반복 실행");
+}
+
+파라미터화 테스트 (입력값 여러 개로 테스트)
+@ParameterizedTest
+@ValueSource(ints = {1, 2, 3, 4})
+void 짝수확인(int num) {
+    assertTrue(num > 0);
+}
+
+순서를 갖는 테스트
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class TestOrder{
+    @Test
+    @Order(1)
+     void 첫번째(){ }
+
+    @Test
+    @Order(2)
+    void 두번째(){ }
+}
+------------------------------------------------------------------------------------------------
+Assert관련 메서드 : 단위 테스트에서 기대한 결과와 실제 결과를 비교하거나, 조건이 참인지 확인하는 데 사용
+org.junit.jupiter.api.Assertions.* 에 포함되어 있다
+| 메서드                                     | 설명                   | 예시                     
+| -------------------------------------- | -------------------- | -------------------------------- |
+| assertEquals(expected, actual)    | 두 값이 같은지 확인          | assertEquals(5, result);   
+| assertNotEquals(expected, actual) | 두 값이 다름을 확인        | assertNotEquals(0, value); 
+| assertTrue(condition)                | 조건이 참인지 확인           | assertTrue(x > 0);   
+| assertFalse(condition)               | 조건이 거짓인지 확인         | assertFalse(list.isEmpty());     
+| assertNull(value)                      | 값이 null인지 확인             | assertNull(obj);    
+| assertNotNull(value)                 | 값이 null이 아닌지 확인    | assertNotNull(user);  
+| assertSame(expected, actual)     | 두 객체가 같은 참조인지 확인 | assertSame(obj1, obj2);  
+| assertNotSame(expected, actual)| 두 객체가 **다른 참조**인지 확인 | assertNotSame(new A(), new A()); 
+| assertArrayEquals(expected, actual)| 두 배열이 같은지 확인      | assertArrayEquals(new int[]{1,2}, result);
+| assertThrows(Exception.class, Executable) | 예외 발생을 확인   | assertThrows(IllegalArgumentException.class, () -> foo(null)); |
+| assertDoesNotThrow(Executable)| 예외가 발생하지 않는지 확인 | assertDoesNotThrow(() -> foo("abc"));   
+| fail(message)                            | 강제로 실패 처리                | fail("이 코드는 실행되면 안 됨");  
+
+
