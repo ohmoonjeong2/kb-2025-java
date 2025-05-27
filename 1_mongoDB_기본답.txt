@@ -1,0 +1,105 @@
+2page
+데이터베이스를 tutorial 로 선정하세요
+use tutorial
+
+users컬렉션에 username 이 smith 인 문서를 저장하세요
+db.users.insert({username: "smith"})
+
+users컬렉션에 username 이 jones 인 문서를 저장하세요
+db.users.insert({username: "jones"})
+
+user컬렉션의 모든 문서를 출력하세요
+db.users.find()
+user컬렉션의 문서 중 하나 만 출력하세요
+db.users.findOne()
+----------------------------------------------------------------------------
+3page
+users컬렉션에서 username 이 "jones"인 문서를 찾아서 출력하세요
+db.users.find ({ username: "smith" })
+
+users컬렉션에서 username 이 "jones" 또는 "smith" 인 문서를 찾아서 출력하세요
+db.users.find ({ $or:
+{ username: "smith" },
+{ username: "jones" }
+]})
+----------------------------------------------------------------------------
+4page
+users컬렉션에서 username이 smith인 문서에 country 키가 Canada 가 되도록 수정하세요
+db.users.update ({username: " smith"},{$set: {country: "Canada"}})
+
+앞의 문서가 올바르게 수정되었는지 확인하세요.
+db.users.find({username: " smith"})
+
+
+----------------------------------------------------------------------------
+5page
+users 컬렉션에서 username이 smith인 문서를 {country: "Canada"}로 대체하고 확인하세요.
+
+users컬렉션에서 country 가 Canada 인 문서를 username: "smith", country: "Canada: 로대체하고 확인하세요
+db.users.reaplceOne ({country: "Canada"}, {username: "smith", country: "Canada"})
+------------------------------------------------------------------------------
+6page
+users컬렉션에서 username 이 smith 인 문서에서 country 키를 삭제하고 , 삭제 여부를 확인하세요
+db.users.update ({username: "smith"}, {$unset: {country:""}}
+
+------------------------------------------------------------------------------
+7page
+데이터베이스전체 목록을 출력하세요 
+show dbs
+
+현재사용 중인 데이터베이스의 컬렉션 목록을 출력하세요
+show collections
+
+현재 사용 중인 데이터베이스와 users 컬렉션의 상태를 출력하세요
+db.stats()
+db.users.stats()
+
+------------------------------------------------------------------------------
+8page
+users컬렉션에서 username 이 smith 인 문서를 삭제하고 , 삭제여부를 확인하세요
+db.users.deleteOne{username: "smith"})
+db.users.find ({username: "smith"})
+
+users컬렉션의 모든 문서를 삭제하고 , 삭제 여부를 확인하세요
+db.users.deleteMany({})
+
+users컬렉션을 삭제하세요
+db.users.drop()
+------------------------------------------------------------------------------
+10page
+다음형태의 문서 20,000 건을 추가하세요
+database : test
+collection : product
+문서필드 : num(0부터순번), name:'스마트폰 ' + 순번
+use test;
+for(let i =0; i <20000; i ++){
+db.product.insertOne({num: i,name: '스마트폰 ' + i});
+}
+product컬렉션의 전체 문서수를 출력하세요
+db.product.countDocuments()
+------------------------------------------------------------------------------
+11page
+product컬렉션의 문서를 num 의 내림 차순으로 정렬하여 출력하세요
+db.product.find().sort({num : 1});
+
+product컬렉션의 문서를 num 의 내림 차순으로 정렬하여 상위 10 건을 출력하세요
+db.product.find().sort({num : -1}).limit(10);
+
+product컬렉션의 문서를 num 의 내림 차순으로 정렬한 상태에서 다음을 처리하세요
+한페이지당 10건씩 출력,
+6페이지에 해당하는 문서를 출력
+db.product.find()
+.sort({num : 1})
+.skip(10*(6-1))
+.limit(10);
+------------------------------------------------------------------------------
+12page
+product컬렉션에서 num 이 15 미만 이거나 19995 초과인 것을 출력하세요
+db.product.find({ $or: [ {num : {$lt :15}},  { num: {$gt : 19995}}]})
+
+product컬렉션에서 name이 '스마트폰 10', '스마트폰 100', '스마트폰 1000' 중에 하나이면 출력하세요
+db.product.find({name:{$in: ['스마트폰 10','스마트폰 100','스마트폰 1000']} });
+------------------------------------------------------------------------------
+13page
+product컬렉션에서 num 이 5 보다 작은 문서를 출력하는데 , name 만 출력하세요
+db.product.find({num : {$lt : 5}}, {_id:0, name:1})

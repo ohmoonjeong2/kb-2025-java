@@ -1,0 +1,150 @@
+Mongo DB   RDB
+collection     table
+document    row
+attribute      column
+--------------------------------------
+--  DB선택 생성 : use 데이터베이스
+use test
+-- 컬렉션 생성 : db.createCollection("컬렉션명")
+db.createCollection("test")
+
+--  컬렉션 제거 : db.컬렉션.drop()
+db.test.drop()
+
+--  document추가 : db.컬렉션명.insertOne(json객체)
+insertOne()/insertMany()호출시 컬렉션이 없으면 컬렉션이 자동 생성된다
+db.users.insertOne({username:"kb", age:15, addr: 'seoul'}); //PK의 역할을 하는 _id속성이 추가됨
+db.users.insertOne({username:"hana", age:20, addr: 'seoul'}) 
+db.users.insertOne({username:"shinhan", age:20, addr: 'busan'})
+
+--  document수정 : db.컬렉션명.updateOne(wherejson, setjson, 옵션)
+                          ex)옵션 : {upsert: true} // 해당documenet가 없으면 새로 만들고, 있으면 수정
+
+db.컬렉션명.updateOne(wherejson, {$set: json}) //필드 추가또는수정
+db.users.updateOne(
+  { username: "kb" }, 
+  { $set: { tel: "02" } }
+)
+
+db.컬렉션명.updateOne(wherejson, {$unset: json}) //필드삭제
+db.users.updateOne(
+  { username: "kb" }, 
+  { $unset: { tel: "" } }
+)
+db.컬렉션명.replaceOne(wherejson, json) : documenet전체를 통째로 교체
+db.users.replaceOne({username:"kb"}, {username:"aaa", age:10, addr:"kwangju"});
+
+-- document삭제 : 
+db.컬렉션명.deleteOne(json)
+db.users.deleteOne({username:"kb"})
+
+db.users.updateOne({username:"kb"}, {$set:{age:15, addr:'seoul'}}, {upsert: true})
+
+-- document검색 : db.컬렉션명.find() 
+db.users.find()
+
+db.컬렉션명.find(wherejson)
+나이가 20세이고 주소가 seoul인 users컬렉션의 document를 출력하시오
+db.users.find({age: 20, addr:'seoul'})
+
+db.컬렉션명.find(wherejson, projectionjson) 
+users컬렉션의 모든document의 username필드를 출력하시오
+db.users.find({}, {username: 1}) //username필드와 _id필드가 출력됨
+db.users.find({}, {username:1, _id: 0}) //username필드만 출력됨
+
+-- 논리 연산 : OR, NOT 
+나이가 15세이거나 주소가 seoul인 document를 출력하시오
+db.users.find({$or: [{age:15}, {addr:'seoul'}] })
+
+나이가 15세 미만인 document를 출력하시오
+db.users.find({age :  {$not: { $gt:15} }})
+
+나이가 15세이거나 20세인 document를 출력하시오
+db.users.find( {age: {$in:[15, 20]} })
+db.users.find( {age: {$nin: [15, 20] }})
+
+-- 비교 연산 : $gt  $gte  $lt $lte  $ne
+나이가 15세보다 많은 document를 출력하시오
+db.users.find({age :  {$gt:15} }})
+
+나이가 15세이상 20세 이하인 document를 출력하시오
+db.users.find({ age: { $gte: 15, $lte: 20 } })
+
+-- 정렬
+오름차순 :  db.컬렉션.find().sort( {필드:1} )
+내림차순 :  db.컬렉션.find().sort( {필드:-1} )
+나이가 15세이상 20세 이하인 document를 출력하시오. 단 나이를 내림차순, 나이가 같다면 주소로 오름차순하세요
+db.users.find({ age: { $gte: 15, $lte: 20 } }).sort({ age: -1, addr: 1 })
+
+-- documents개수반환
+db.users.countDocuments()
+--------------------------------------------------------------
+데이터베이스 정보 보기 : show dbs
+현재 사용중인 DB의 컬렉션목록 보기 : show collections
+현재사용중인 데이터베이스 : db.stats()
+컬렉션 상태 보기 : db.컬렉션.stats()
+
+----------------------------------------
+필드값이 객체이거나 배열인 경우
+db.users.insert({username: "smith"})
+db.users.update( {username: "smith"},
+{$set: {
+    favorites: {
+        cities: ["seoul", "tokyo"],
+        country: []
+    }
+ }
+})
+
+필드값이 객체인 경우 필드사용방법 :  "필드명.객체필드명"
+favorites.cities가 tokyo인 users컬렉션의 document를 모두 출력하시오
+db.users.find({"favorites.cities": "tokyo"})
+
+필드값이 배열인 경우 필드값을 변경하는 방법
+중복 없이 추가 : $addToSet
+
+favorites.cities필드에 "tokyo"를 갖는 users컬렉션을 찾아 favorites.country필드에 "japen"을 추가하시오. 단 favorites.country필드에 "japen"이 없을 경우만 추가하시오
+db.users.updateMany( {"favorites.cities": "tokyo"},
+{$addToSet: {"favorites.country": "japen"} })
+
+중복을 허용하여 추가 : $push
+favorites.cities필드에 "tokyo"를 갖는 users컬렉션을 찾아 favorites.country필드에 "japen"을 추가하시오. 단 favorites.country필드에 "japen"이 있어도 추가하시오
+db.users.updateMany( {"favorites.cities": "tokyo"},
+{$push: {"favorites.country": "japen"} })
+----------------------------------------
+실행 통계 : explain() - 쿼리를 어떻게 실행했는지, 인덱스를 사용했는지, 몇 건을 스캔했는지 등을 확인할 수 있다
+db.users.find({age : {$gte: 15, $lte:20}})
+.explain("executionStats")
+
+explain모드
+| 모드                    | 설명                               |
+| --------------------- | -------------------------------- |
+| "queryPlanner" (기본) | 실행 계획만 보여줌 (실행 X)            |
+| "executionStats"    | 실제로 쿼리를 실행하고 통계도 함께 보여줌      |
+| "allPlansExecution" | 실행된 모든 쿼리 계획을 자세히 보여줌 (디버깅용) |
+
+
+출력항목
+queryPlanner : 어떤 실행 계획을 선택
+executionStats : 실제 쿼리 수행 결과에 대한 통계
+| 필드                    | 설명                                  |
+| --------------------- | ----------------------------------- |
+| nReturned           | 실제 반환된 문서 수                         |
+| totalKeysExamined   | 인덱스 키 검사 수                          |
+| totalDocsExamined   | 실제 문서 스캔 수                          |
+| executionTimeMillis | 쿼리 실행 시간 (ms)                       |
+| stage               | 사용된 쿼리 스테이지 (예: COLLSCAN, IXSCAN 등) 
+                          COLLSCAN: 전체 컬렉션 스캔이므로 성능이 낮을 수 있음
+                          IXSCAN이면:인덱스를 사용한 효율적인 검색
+
+----------------------------------------
+인덱스 생성 :  db.컬렉션명.createIndex({ 필드명: 정렬방향 })
+정렬방향 (1: 오름차순 인덱스, -1: 내림차순 인덱스 (정렬 방향은 검색 성능에 영향 없음, 정렬할 때만 차이))
+
+인덱스 제거 
+db.users.dropIndex({ age: 1 })
+
+인덱스  목록 보기
+db.users.getIndexes()
+
+
